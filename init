@@ -1,0 +1,41 @@
+sudo apt update && sudo apt upgrade --yes
+curl -s https://get.nibiru.fi/! | bash
+nibid version
+
+# v0.16.3
+
+nibid init <moniker-name> --chain-id=nibiru-testnet-2 --home $HOME/.nibid
+nibid keys add <key-name>
+NETWORK=nibiru-testnet-2
+curl -s https://networks.testnet.nibiru.fi/$NETWORK/genesis > $HOME/.nibid/config/genesis.json
+curl -s https://rpc.testnet-2.nibiru.fi/genesis | jq -r .result.genesis > $HOME/.nibid/config/genesis.json
+shasum -a 256 $HOME/.nibid/config/genesis.json
+
+# 5cedb9237c6d807a89468268071647649e90b40ac8cd6d1ded8a72323144880d $HOME/.nibid/config/genesis.json
+NETWORK=nibiru-testnet-2
+sed -i 's|seeds =.*|seeds = "'$(curl -s https://networks.testnet.nibiru.fi/$NETWORK/seeds)'"|g' $HOME/.nibid/config/config.toml
+sed -i 's/minimum-gas-prices =.*/minimum-gas-prices = "0.025unibi"/g' $HOME/.nibid/config/app.toml
+NETWORK=nibiru-testnet-2
+sed -i 's|enable =.*|enable = true|g' $HOME/.nibid/config/config.toml
+sed -i 's|rpc_servers =.*|rpc_servers = "'$(curl -s https://networks.testnet.nibiru.fi/$NETWORK/rpc_servers)'"|g' $HOME/.nibid/config/config.toml
+sed -i 's|trust_height =.*|trust_height = "'$(curl -s https://networks.testnet.nibiru.fi/$NETWORK/trust_height)'"|g' $HOME/.nibid/config/config.toml
+sed -i 's|trust_hash =.*|trust_hash = "'$(curl -s https://networks.testnet.nibiru.fi/$NETWORK/trust_hash)'"|g' $HOME/.nibid/config/config.toml
+# without a daemon
+nibid start
+
+# with systemd
+sudo systemctl start nibiru
+
+# with cosmovisor
+sudo systemctl start cosmovisor-nibiru
+# without a daemon
+nibid start
+
+# with systemd
+sudo systemctl start nibiru
+
+# with cosmovisor
+sudo systemctl start cosmovisor-nibiru
+FAUCET_URL="https://faucet.testnet-2.nibiru.fi/"
+ADDR="..." # your address 
+curl -X POST -d '{"address": "'"$ADDR"'", "coins": ["10000000unibi","100000000000unusd"]}' $FAUCET_URL
