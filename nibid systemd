@@ -1,0 +1,22 @@
+sudo tee /etc/systemd/system/nibiru.service<<EOF
+[Unit]
+Description=Nibiru Node
+Requires=network-online.target
+After=network-online.target
+
+[Service]
+Type=exec
+User=<your_user>
+Group=<your_user_group>
+ExecStart=/home/<your_user>/go/bin/nibid start --home /home/<your_user>/.nibid
+Restart=on-failure
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGTERM
+PermissionsStartOnly=true
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target
+EOF
+sudo systemctl daemon-reload
+sudo systemctl enable nibiru
